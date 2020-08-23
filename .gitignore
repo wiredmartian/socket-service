@@ -1,0 +1,25 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+# SSH Keys
+sshkey
+sshkey.pub
+# Runtime data
+pids
+*.pid
+*.seed
+# Directory containing development build
+dev
+mochawesome-report
+coverage
+.env
+.nyc_output
+.map
+# node-waf configuration
+.lock-wscript
+# Dependency directory
+node_modules
+dist
+.idea
+public/*
