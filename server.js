@@ -52,12 +52,7 @@ server.route({
     handler: async (request, reply) => {
         console.log(request.body);
         const room = request.body.PAY_REQUEST_ID;
-        /** notify everyone in a room */
         ioServer.to(room).emit('complete', request.body.PAY_REQUEST_ID);
-        /** leave the room */
-        ioServer.of('/').in(room).client((err, socketIds) => {
-            Array.from(socketIds).forEach(socketId => ioServer.sockets.sockets[socketId]).leave(room);
-        })
         return reply.send('Ok');
     },
 });
