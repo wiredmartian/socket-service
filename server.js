@@ -1,7 +1,7 @@
 const fastify = require("fastify")
 const io = require("socket.io")
 
-const server = fastify({ http2: false, logger: true })
+const server = fastify({ http2: false, logger: false })
 
 server.register(require("fastify-cors"), {
     origin: true,
@@ -36,12 +36,39 @@ ioServer.on('connection', (socket) => {
 });
 const build = async () => {
     try {
-        await server.listen(9001, '0.0.0.0');
+        const PORT = parseInt(process.env.PORT);
+        await server.listen(PORT, '0.0.0.0');
+        console.info(`server is up and running on ${PORT}`);
     } catch (err) {
         console.log(err);
         process.exit(1);
     }
 };
+
+/** routes */
+server.route({
+    method: 'POST',
+    url: '/payment/complete',
+    handler: async (request, reply) => {
+        console.log(request.body);
+        const room = request.body.PAY_REQUEST_ID;
+        /** notify everyone in a room */
+        ioServer.to(room).emit('complete', request.body.PAY_REQUEST_ID);
+        /** leave the room */
+        ioServer.of('/').in(room).client((err, socketIds) => {
+            Array.from(socketIds).forEach(socketId => ioServer.sockets.sockets[socketId]).leave(room);
+        })
+        return reply.send('Ok');
+    },
+});
+server.route({
+    method: 'GET',
+    url: '/payment/complete',
+    handler: async (request, reply) => {
+        return reply.send('OK');
+    },
+});
+/** end routes */
 
 process.on('uncaughtException', err => {
     console.error(err);
